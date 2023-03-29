@@ -26,12 +26,19 @@ public class GameArea extends JPanel
         block = new TetrisBlock(new int[][]{{1,0},{1,0},{1,1}},Color.blue);
         block.spawn(gridColumns);
     }
+    public boolean isBlockOutOfBounds()
+    {
+        if(block.getY()<0)
+        {   
+            block=null;
+            return true;
+        }
+        return false;
+    }
     public boolean moveBlockDown()
     {   
         if(checkBottom()==false)
         {   
-            moveBlockToBackground();
-            clearLines();
             return false;
         }
         block.moveDown();
@@ -40,23 +47,27 @@ public class GameArea extends JPanel
     }
     public void moveBlockLeft()
     {   
+        if(block==null) return;
         if(!checkLeft()) return;
         block.moveLeft();
         repaint();
     }
     public void moveBlockRight()
     {   
+        if(block==null) return;
         if(!checkRight()) return;
         block.moveRight();
         repaint();
     }
     public void rotateBlock()
     {
+        if(block==null) return;
         block.rotate();
         repaint();
     }
     public void dropBlock()
-    {
+    {   
+        if(block==null) return;
         while(checkBottom())
         {
             block.moveDown();
@@ -132,9 +143,10 @@ public class GameArea extends JPanel
         }
         return true;
     }
-    private void clearLines()
+    public int clearLines()
     {   
         boolean lineFilled=true;
+        int linesCleared=0;
         for(int r=gridRows-1;r>=0;r--)
         {
             for(int c=0;c<gridColumns;c++)
@@ -146,13 +158,16 @@ public class GameArea extends JPanel
               }
             }
             if(lineFilled)
-            {   
+            {    
+                linesCleared++;
                 clearLine(r);
                 shiftDown(r);
                 clearLine(0);
+                r++;
                 repaint();
             }
         }
+        return linesCleared;
     }
     private void clearLine(int r)
     {
@@ -171,7 +186,7 @@ public class GameArea extends JPanel
             }
         }
     }
-    private void moveBlockToBackground()
+    public void moveBlockToBackground()
     {
         int[][] shape = block.getShape();
         
