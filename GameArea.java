@@ -1,7 +1,9 @@
 package tetris;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.Random;
 import javax.swing.JPanel;
+import tetrisBlocks.*;
 public class GameArea extends JPanel
 {
     private int gridRows;
@@ -9,6 +11,7 @@ public class GameArea extends JPanel
     private int gridCellSize;
     private Color[][] background;
     private TetrisBlock block;
+    private TetrisBlock[] blocks;
     public GameArea(JPanel placeholder,int columns)
     {   
         placeholder.setVisible(false);
@@ -19,11 +22,20 @@ public class GameArea extends JPanel
         gridCellSize=(this.getBounds().width)/gridColumns;
         gridRows=(this.getBounds().height)/gridCellSize;
         System.out.println("the no of rows is: "+gridRows);
-        background=new Color[gridRows][gridColumns]; 
+        background=new Color[gridRows][gridColumns];
+        blocks = new TetrisBlock[]{new IShape(),
+                                   new LShape(),
+                                   new TShape(),
+                                   new SShape(),
+                                   new OShape(),
+                                   new ZShape(),
+                                   new JShape()
+                                  }; 
     }
     public void spawnBlock()
-    {
-        block = new TetrisBlock(new int[][]{{1,0},{1,0},{1,1}},Color.blue);
+    {   
+        Random r =  new Random();
+        block = blocks[ r.nextInt(blocks.length ) ];
         block.spawn(gridColumns);
     }
     public boolean isBlockOutOfBounds()
@@ -63,6 +75,9 @@ public class GameArea extends JPanel
     {
         if(block==null) return;
         block.rotate();
+        if(block.getLeftEdge()<0) block.setX(0);
+        if(block.getRightEdge()>=gridColumns) block.setX(gridColumns-block.getWidth());
+        if(block.getBottomEdge()>=gridRows) block.setY(gridRows-block.getHeight());
         repaint();
     }
     public void dropBlock()
@@ -146,7 +161,7 @@ public class GameArea extends JPanel
     public int clearLines()
     {   
         boolean lineFilled=true;
-        int linesCleared=0;
+        int linesClear_count=0;
         for(int r=gridRows-1;r>=0;r--)
         {
             for(int c=0;c<gridColumns;c++)
@@ -159,7 +174,7 @@ public class GameArea extends JPanel
             }
             if(lineFilled)
             {    
-                linesCleared++;
+                linesClear_count++;
                 clearLine(r);
                 shiftDown(r);
                 clearLine(0);
@@ -167,7 +182,7 @@ public class GameArea extends JPanel
                 repaint();
             }
         }
-        return linesCleared;
+        return linesClear_count;
     }
     private void clearLine(int r)
     {
@@ -255,6 +270,13 @@ public class GameArea extends JPanel
     protected void paintComponent(Graphics g)
     {   
         super.paintComponent(g);
+//        for(int i=0;i<gridColumns;i++)
+//        {
+//            for(int j=0;j<gridRows;j++)
+//            {
+//                g.drawRect(i*gridCellSize,j*gridCellSize,gridCellSize,gridCellSize);
+//            }
+//        }
         drawBackground(g);
         drawBlock(g);
     }
